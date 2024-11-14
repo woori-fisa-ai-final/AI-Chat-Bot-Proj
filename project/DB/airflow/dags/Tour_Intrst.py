@@ -6,7 +6,7 @@ from airflow.operators.python_operator import PythonOperator
 from opensearchpy import OpenSearch, helpers
 from dotenv import load_dotenv
 
-# 환경 변수 로드
+# 환경 변수 로드 . 
 load_dotenv()
 
 host = os.getenv("HOST")
