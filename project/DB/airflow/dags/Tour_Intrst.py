@@ -20,7 +20,7 @@ client = OpenSearch(
     verify_certs=False
 )
 
-INDEX_NAME = "TOUR_AREA_INTRST_20240930"
+INDEX_NAME = "tour_area_intrst_20240930"
 DATA_FILE_PATH = "./dags/package/CI_OVSEA_TOUR_AREA_INTRST_DGREE_INFO_20240930.json"
 
 # OpenSearch 인덱스를 생성 또는 갱신하는 함수 정의
@@ -91,7 +91,7 @@ default_args = {
 
 # DAG 정의
 with DAG(
-    'tour_area_intrst_upload',  # DAG 이름
+    'EJ_tour_area_intrst_upload',  # DAG 이름
     default_args=default_args,  # 기본 인자 설정
     description="관광 관심 데이터를 OpenSearch에 업로드하는 DAG",  # 설명
     schedule_interval=None,  # 수동 실행
