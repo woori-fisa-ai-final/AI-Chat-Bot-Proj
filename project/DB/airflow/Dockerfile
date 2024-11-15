@@ -35,7 +35,8 @@ RUN pip install --no-cache-dir --upgrade \
     wordcloud \
     gensim \
     openai \
-    opensearch-py
+    opensearch-py \
+    random
 RUN pip install --no-cache-dir --upgrade \
     opensearch-py-ml \
     pytrends

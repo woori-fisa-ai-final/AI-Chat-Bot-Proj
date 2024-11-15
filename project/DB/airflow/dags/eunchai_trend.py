@@ -7,6 +7,7 @@ from collections import Counter
 from pytrends.request import TrendReq
 import time
 import os
+import random
 from opensearchpy import OpenSearch, helpers
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
@@ -104,7 +105,7 @@ def get_google_trends(keywords):
     pytrends = TrendReq(hl='ko-KR', tz=540)
     trends_data, trends_over_time = {}, {}
     for group in [keywords[i:i+5] for i in range(0, len(keywords), 5)]:
-        for _ in range(3):
+        for attempt in range(5):  # 최대 5번 시도
             try:
                 pytrends.build_payload(group, timeframe='today 3-m')
                 interest_over_time = pytrends.interest_over_time()
@@ -114,8 +115,10 @@ def get_google_trends(keywords):
                 break
             except Exception as e:
                 print(f"Error: {str(e)}")
-                time.sleep(60)
-        time.sleep(5)
+                wait_time = (2 ** attempt) + random.uniform(0, 1)  # 지수 백오프 + 무작위성
+                time.sleep(wait_time)
+        else:
+            print(f"Failed to fetch data for group: {group}")
     return trends_data, trends_over_time
 
 # 뉴스 데이터와 트렌드 데이터 결합
@@ -178,28 +181,39 @@ def create_bulk_actions_from_df(df, index_name):
 
 # OpenSearch에 결과 업로드 (고정 인덱스 사용)
 def upload_to_opensearch(data):
-    index_name = "trend_data"  # 고정된 인덱스 이름
+    index_name = "trend_data"
+    if not isinstance(data['combined_results'], dict):
+        print("Error: combined_results is not a dictionary")
+        return
+    
     for category, items in data['combined_results'].items():
+        if not isinstance(items, list):
+            print(f"Error: items for category {category} is not a list")
+            continue
+        
         for item in items:
-            # 문서에 날짜 정보와 새 칼럼을 추가
-            response = client.update(
-                index=index_name,
-                id=item['word'],  # 고유한 식별자 (예: 단어) 사용
-                body={
-                    "doc": {
-                        f"trend_score_{datetime.now().strftime('%Y%m%d')}": item['trend_score'],
-                        f"combined_score_{datetime.now().strftime('%Y%m%d')}": item['combined_score'],
-                        f"trend_over_time_{datetime.now().strftime('%Y%m%d')}": item['trend_over_time'],
-                        "links": item['links']
-                    },
-                    "doc_as_upsert": True  # 해당 문서가 없으면 새로 생성
-                }
-            )
-            if response.get('result') in ['updated', 'created']:
+            if not isinstance(item, dict) or 'word' not in item:
+                print(f"Error: Invalid item structure in category {category}")
+                continue
+            
+            try:
+                response = client.update(
+                    index=index_name,
+                    id=item['word'],
+                    body={
+                        "doc": {
+                            f"trend_score_{datetime.now().strftime('%Y%m%d')}": item.get('trend_score', 0),
+                            f"combined_score_{datetime.now().strftime('%Y%m%d')}": item.get('combined_score', 0),
+                            f"trend_over_time_{datetime.now().strftime('%Y%m%d')}": item.get('trend_over_time', {}),
+                            "links": item.get('links', [])
+                        },
+                        "doc_as_upsert": True
+                    }
+                )
                 print(f"Document uploaded successfully: {item['word']}")
-            else:
+            except Exception as e:
                 print(f"Failed to upload document: {item['word']}")
-                print(response)
+                print(f"Error: {str(e)}")
 
 
 # 전체 파이프라인 실행 함수

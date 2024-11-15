@@ -1,0 +1,54 @@
+{
+    "combined_results": [
+        {
+            "word": "경제",
+            "count": 120,
+            "trend_score": 82.5,
+            "combined_score": 150.0,
+            "links": [
+                "https://news.naver.com/article/001/0012345678",
+                "https://news.naver.com/article/002/0023456789",
+                "https://news.naver.com/article/003/0034567890"
+            ],
+            "trend_over_time": {
+                "2024-11-13": 75,
+                "2024-11-14": 80,
+                "2024-11-15": 82.5
+            },
+            "category": "경제"
+        },
+        {
+            "word": "스포츠",
+            "count": 150,
+            "trend_score": 90.0,
+            "combined_score": 180.0,
+            "links": [
+                "https://news.naver.com/article/004/0045678901",
+                "https://news.naver.com/article/005/0056789012",
+                "https://news.naver.com/article/006/0067890123"
+            ],
+            "trend_over_time": {
+                "2024-11-13": 85,
+                "2024-11-14": 88,
+                "2024-11-15": 90.0
+            },
+            "category": "스포츠"
+        },
+        {
+            "word": "정치",
+            "count": 200,
+            "trend_score": 70.0,
+            "combined_score": 140.0,
+            "links": [
+                "https://news.naver.com/article/007/0078901234",
+                "https://news.naver.com/article/008/0089012345"
+            ],
+            "trend_over_time": {
+                "2024-11-13": 60,
+                "2024-11-14": 65,
+                "2024-11-15": 70.0
+            },
+            "category": "정치"
+        }
+    ]
+}
