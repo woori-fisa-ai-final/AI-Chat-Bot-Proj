@@ -89,7 +89,6 @@ def fetch_new_data(**context):
                         else:
                             data_dict[child.tag] = child.text
 
-                    data_dict['date'] = context['execution_date'].strftime('%Y-%m-01')
                     year_data.append(data_dict)
 
             return year_data
@@ -100,10 +99,10 @@ def fetch_new_data(**context):
 
     # 최신 연도 확인 및 신규 데이터 수집
     latest_year = get_latest_year_in_mysql()
-    current_year = datetime.now().year
+    current_year = datetime.now().year  # 현재 연도까지 수집하도록 수정 (-1 제거)
     
     new_data = []
-    for year in range(latest_year + 1, current_year + 1):
+    for year in range(latest_year + 1, current_year + 1):  # current_year + 1로 현재 연도 포함
         year_data = fetch_year_data(year)
         if year_data:
             new_data.extend(year_data)
@@ -114,7 +113,6 @@ def fetch_new_data(**context):
         return None
     
     df = pd.DataFrame(new_data)
-    df['date'] = pd.to_datetime(df['date'])
     logging.info(f"Created DataFrame with {len(df)} new records")
     
     return df
@@ -151,9 +149,9 @@ with DAG(
     '11_franchise_data_pipeline',
     default_args=default_args,
     description='Franchise data collection and MySQL upload pipeline',
-    schedule_interval='@monthly',
-    start_date=datetime(2024, 1, 1),
-    catchup=False,
+    schedule_interval='@yearly',  # 월간에서 연간으로 변경
+    start_date=datetime(2017, 1, 1),  # 시작일을 2017년으로 변경
+    catchup=True,  # 과거 데이터 수집을 위해 True로 설정
     tags=['franchise', 'mysql', 'data']
 ) as dag:
 
